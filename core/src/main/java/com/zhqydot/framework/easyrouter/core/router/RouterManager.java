@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.zhqydot.framework.easyrouter.core.safr.ActivityResultInfo;
@@ -16,51 +17,63 @@ import java.util.Map;
 
 import io.reactivex.Observable;
 
+/**
+ * @author zhqy
+ * @date 2018/9/16
+ */
+
 public class RouterManager {
 
+    private static Context mContext;
+
     private static Map<String, Class> routeMap = new HashMap<>();
-    private static RouterInterceptor interceptor;
 
-    public static void route(Context context, String path) {
-        route(context, path, null);
+    public static RouteBuilder routeTo(@NonNull String path) {
+        return new RouteBuilder(path);
     }
 
-    public static void route(Context context, String path, Bundle bundle) {
-        if (interceptor == null || interceptor.onRoute(path)) {
-            Class aClass = routeMap.get(path);
-            if (aClass != null) {
-                Intent intent = new Intent();
-                intent.setClass(context, aClass);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                if (bundle != null) {
-                    intent.putExtras(bundle);
-                }
-                context.startActivity(intent);
-            } else {
-                throw new RouteException();
-            }
-        }
-
+    public static RouteBuilder routeTo(Context context, @NonNull String path) {
+        return new RouteBuilder(context, path);
     }
 
-    public static Observable<ActivityResultInfo> routeForResult(Activity activity, String path, int requestCode) {
-        return routeForResult(activity, path, null, requestCode);
-    }
-
-    public static Observable<ActivityResultInfo> routeForResult(Activity activity, String path, Bundle bundle, int requestCode) {
-        Class clazz = routeMap.get(path);
+    protected static void navigation(RouteBuilder routeBuilder) {
+        Class clazz = routeMap.get(routeBuilder.getPath());
+        Context context = routeBuilder.getContext() == null ? mContext : routeBuilder.getContext();
         if (clazz != null) {
-            Intent intent = new Intent(activity, clazz);
-            if (bundle != null) {
-                intent.putExtras(bundle);
+            Intent intent = new Intent();
+            intent.setClass(context, clazz);
+            if (!(context instanceof Activity)) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             }
-            return new RxActivityResult(activity).startForResult(intent, requestCode);
+            if (routeBuilder.getExtras() != null) {
+                intent.putExtras(routeBuilder.getExtras());
+            }
+            context.startActivity(intent);
         } else {
-            throw new RouteException();
+            throw new RouteException("Unable to find an activity for the path, have you register before?");
         }
     }
 
-    public static void register(String path, Class activity) {
+    protected static Observable<ActivityResultInfo> navigationForResult(RouteBuilder routeBuilder, int requestCode) {
+        Class clazz = routeMap.get(routeBuilder.getPath());
+        Context context = routeBuilder.getContext();
+        if (clazz != null) {
+            if (!(context instanceof Activity)) {
+                throw new RouteException("Navigation for result need the activity context to support.");
+            } else {
+                Activity activity = (Activity) context;
+                Intent intent = new Intent(activity, clazz);
+                if (routeBuilder.getExtras() != null) {
+                    intent.putExtras(routeBuilder.getExtras());
+                }
+                return new RxActivityResult(activity).startForResult(intent, requestCode);
+            }
+        } else {
+            throw new RouteException("Unable to find an activity for the path, have you register before?");
+        }
+    }
+
+    public static void register(@NonNull String path, @NonNull Class<? extends Activity> activity) {
         try {
             Class clazz = activity.asSubclass(Activity.class);
             routeMap.put(path, activity);
@@ -69,12 +82,8 @@ public class RouterManager {
         }
     }
 
-    public static void init() {
-        init(null);
-    }
-
-    public static void init(RouterInterceptor interceptor) {
-        RouterManager.interceptor = interceptor;
+    public static void init(@NonNull Context context) {
+        mContext = context.getApplicationContext();
         try {
             Class clazz = Class.forName("com.zhqydot.framework.easyrouter.core.RouterLoader");
             Object obj = clazz.newInstance();

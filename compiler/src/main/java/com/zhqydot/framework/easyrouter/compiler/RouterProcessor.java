@@ -17,23 +17,35 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import javax.tools.JavaFileObject;
 
 @AutoService(Processor.class)
 public class RouterProcessor extends AbstractProcessor {
 
     private Filer mFiler;
+    private Elements mElements;
+    private Types mTypes;
+
     @Override public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
         mFiler = processingEnvironment.getFiler();
+        mElements = processingEnv.getElementUtils();
+        mTypes = processingEnv.getTypeUtils();
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
-        Set<? extends Element> routerElements = roundEnvironment.getElementsAnnotatedWith(Router.class);
-        Map<String, String> routeMap = new HashMap<>();
+        Set<? extends Element> routerElements = roundEnvironment.getElementsAnnotatedWith(Route.class);
+        Map<String, TypeElement> routeMap = new HashMap<>();
+        TypeMirror typeActivity = mElements.getTypeElement("android.app.Activity").asType();
         for (Element element : routerElements) {
-            routeMap.put(element.getAnnotation(Router.class).path(), ((TypeElement) element).getQualifiedName().toString());
+            if (!mTypes.isSubtype(element.asType(), typeActivity)) {
+                throw new RuntimeException("Unsupported class type, type is [" + element.asType().toString() + "], only support Activity now.");
+            }
+            routeMap.put(element.getAnnotation(Route.class).path(), (TypeElement) element);
         }
         createFile(routeMap);
         return true;
@@ -46,11 +58,11 @@ public class RouterProcessor extends AbstractProcessor {
 
     @Override public Set<String> getSupportedAnnotationTypes() {
         Set<String> annotations = new LinkedHashSet<>();
-        annotations.add(Router.class.getCanonicalName());
+        annotations.add(Route.class.getCanonicalName());
         return annotations;
     }
 
-    private void createFile(Map<String, String> routeMap) {
+    private void createFile(Map<String, TypeElement> routeMap) {
         try {
             JavaFileObject jfo = mFiler.createSourceFile("com.zhqydot.framework.easyrouter.core.RouterLoader", new Element[]{});
             Writer writer = jfo.openWriter();
@@ -62,20 +74,20 @@ public class RouterProcessor extends AbstractProcessor {
         }
     }
 
-    private String brewCode(Map<String, String> routeMap) {
+    private String brewCode(Map<String, TypeElement> routeMap) {
         StringBuilder builder = new StringBuilder();
         builder.append("package com.zhqydot.framework.easyrouter.core;\n\n");
+        builder.append("import com.zhqydot.framework.easyrouter.core.router.RouterManager;\n");
+        for (Map.Entry<String, TypeElement> entry : routeMap.entrySet()) {
+            builder.append("import ").append(entry.getValue().getQualifiedName()).append(";\n");
+        }
         appendComment(builder);
-        builder.append("import com.zhqydot.framework.easyrouter.core.RouterManager;\n\n");
         builder.append("public class RouterLoader { \n\n");
         builder.append("\tpublic void load() { \n");
-        for (Map.Entry<String, String> entry : routeMap.entrySet()) {
-            builder.append("\t\ttry {\n");
-            String reg = String.format("RouterManager.register(\"%s\", Class.forName(\"%s\"));", entry.getKey(), entry.getValue());
-            builder.append("\t\t\t").append(reg).append("\n");
-            builder.append("\t\t} catch(ClassNotFoundException e) {\n");
-            builder.append("\t\t\te.printStackTrace();\n");
-            builder.append("\t\t}\n");
+        for (Map.Entry<String, TypeElement> entry : routeMap.entrySet()) {
+            builder.append("\t\t");
+            builder.append(String.format("RouterManager.register(\"%s\", %s.class);", entry.getKey(), entry.getValue().getSimpleName()));
+            builder.append("\n");
         }
         builder.append("\t}\n");
         builder.append("}");
