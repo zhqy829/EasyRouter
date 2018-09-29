@@ -13,6 +13,7 @@ import com.zhqydot.framework.easyrouter.core.safr.RxActivityResult;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
@@ -75,7 +76,6 @@ public class RouterManager {
 
     public static void register(@NonNull String path, @NonNull Class<? extends Activity> activity) {
         try {
-            Class clazz = activity.asSubclass(Activity.class);
             routeMap.put(path, activity);
         } catch (ClassCastException e) {
             e.printStackTrace();
@@ -84,15 +84,18 @@ public class RouterManager {
 
     public static void init(@NonNull Context context) {
         mContext = context.getApplicationContext();
-        try {
-            Class clazz = Class.forName("com.zhqydot.framework.easyrouter.core.RouterLoader");
-            Object obj = clazz.newInstance();
-            Method method = clazz.getDeclaredMethod("load");
-            method.invoke(obj);
-        } catch (ClassNotFoundException | IllegalAccessException |
-                InstantiationException | NoSuchMethodException | InvocationTargetException e) {
-            e.printStackTrace();
-            Log.e("RouteManager", e.getMessage());
+        List<String> classes = ClassUtils.getClasses(context, "com.zhqydot.framework.easyrouter.core.RouteLoader$");
+        for (String className : classes) {
+            try {
+                Class clazz = Class.forName(className);
+                Object obj = clazz.newInstance();
+                Method method = clazz.getDeclaredMethod("load");
+                method.invoke(obj);
+            } catch (ClassNotFoundException | IllegalAccessException |
+                    InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+                e.printStackTrace();
+                Log.e("RouterManager", e.getMessage());
+            }
         }
     }
 

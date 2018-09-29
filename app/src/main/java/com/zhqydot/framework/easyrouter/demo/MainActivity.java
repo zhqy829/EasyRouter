@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.zhqydot.framework.easyrouter.R;
+import com.zhqydot.framework.easyrouter.compiler.Route;
 import com.zhqydot.framework.easyrouter.core.router.RouterManager;
 
 /**
@@ -13,6 +14,7 @@ import com.zhqydot.framework.easyrouter.core.router.RouterManager;
  * @date 2018/9/16
  */
 
+@Route(path = "main")
 public class MainActivity extends AppCompatActivity {
 
     @Override

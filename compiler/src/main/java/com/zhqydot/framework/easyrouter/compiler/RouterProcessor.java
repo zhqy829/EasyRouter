@@ -63,32 +63,31 @@ public class RouterProcessor extends AbstractProcessor {
     }
 
     private void createFile(Map<String, TypeElement> routeMap) {
-        try {
-            JavaFileObject jfo = mFiler.createSourceFile("com.zhqydot.framework.easyrouter.core.RouterLoader", new Element[]{});
-            Writer writer = jfo.openWriter();
-            writer.write(brewCode(routeMap));
-            writer.flush();
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (Map.Entry<String, TypeElement> entry : routeMap.entrySet()) {
+            try {
+                String className = "RouteLoader$" + entry.getValue().getSimpleName() + "$" + entry.getKey();
+                JavaFileObject jfo = mFiler.createSourceFile(className, new Element[]{});
+                Writer writer = jfo.openWriter();
+                writer.write(brewCode(className, entry));
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private String brewCode(Map<String, TypeElement> routeMap) {
+    private String brewCode(String className, Map.Entry<String, TypeElement> entry) {
         StringBuilder builder = new StringBuilder();
         builder.append("package com.zhqydot.framework.easyrouter.core;\n\n");
         builder.append("import com.zhqydot.framework.easyrouter.core.router.RouterManager;\n");
-        for (Map.Entry<String, TypeElement> entry : routeMap.entrySet()) {
-            builder.append("import ").append(entry.getValue().getQualifiedName()).append(";\n");
-        }
+        builder.append("import ").append(entry.getValue().getQualifiedName()).append(";\n");
         appendComment(builder);
-        builder.append("public class RouterLoader { \n\n");
+        builder.append("public class ").append(className).append(" { \n\n");
         builder.append("\tpublic void load() { \n");
-        for (Map.Entry<String, TypeElement> entry : routeMap.entrySet()) {
-            builder.append("\t\t");
-            builder.append(String.format("RouterManager.register(\"%s\", %s.class);", entry.getKey(), entry.getValue().getSimpleName()));
-            builder.append("\n");
-        }
+        builder.append("\t\t");
+        builder.append(String.format("RouterManager.register(\"%s\", %s.class);", entry.getKey(), entry.getValue().getSimpleName()));
+        builder.append("\n");
         builder.append("\t}\n");
         builder.append("}");
         return builder.toString();

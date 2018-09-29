@@ -1,12 +1,13 @@
-package com.zhqydot.framework.easyrouter.demo;
+package com.zhqydot.framework.easyrouter.second;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.zhqydot.framework.easyrouter.R;
 import com.zhqydot.framework.easyrouter.compiler.Route;
+import com.zhqydot.framework.second.R;
+
 
 /**
  * @author zhqy

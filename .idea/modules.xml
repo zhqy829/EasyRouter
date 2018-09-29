@@ -3,13 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/EasyRouter.iml" filepath="$PROJECT_DIR$/EasyRouter.iml" />
-      <module fileurl="file://F:\Android Project\EasyRouter\EasyRouter.iml" filepath="F:\Android Project\EasyRouter\EasyRouter.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://F:\Android Project\EasyRouter\app\app.iml" filepath="F:\Android Project\EasyRouter\app\app.iml" />
       <module fileurl="file://$PROJECT_DIR$/compiler/compiler.iml" filepath="$PROJECT_DIR$/compiler/compiler.iml" />
-      <module fileurl="file://F:\Android Project\EasyRouter\compiler\compiler.iml" filepath="F:\Android Project\EasyRouter\compiler\compiler.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
-      <module fileurl="file://F:\Android Project\EasyRouter\core\core.iml" filepath="F:\Android Project\EasyRouter\core\core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/second/second.iml" filepath="$PROJECT_DIR$/second/second.iml" />
     </modules>
   </component>
 </project>
