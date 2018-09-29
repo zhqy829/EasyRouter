@@ -65,10 +65,10 @@ public class RouterProcessor extends AbstractProcessor {
     private void createFile(Map<String, TypeElement> routeMap) {
         for (Map.Entry<String, TypeElement> entry : routeMap.entrySet()) {
             try {
-                String className = "RouteLoader$" + entry.getValue().getSimpleName() + "$" + entry.getKey();
+                String className = "com.zhqydot.framework.easyrouter.core.RouteLoader$" + entry.getValue().getSimpleName() + "$" + entry.getKey();
                 JavaFileObject jfo = mFiler.createSourceFile(className, new Element[]{});
                 Writer writer = jfo.openWriter();
-                writer.write(brewCode(className, entry));
+                writer.write(brewCode("RouteLoader$" + entry.getValue().getSimpleName() + "$" + entry.getKey(), entry));
                 writer.flush();
                 writer.close();
             } catch (IOException e) {
