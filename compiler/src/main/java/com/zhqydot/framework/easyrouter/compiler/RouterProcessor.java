@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -25,6 +27,12 @@ import javax.tools.JavaFileObject;
 @AutoService(Processor.class)
 public class RouterProcessor extends AbstractProcessor {
 
+    private static final String PACKAGE_NAME = "com.zhqydot.framework.easyrouter.core";
+    private static final String LOADER_PREFIX = "RouteLoader";
+    private static final String FIELD_DELIMITER = "$$";
+    private static final String WORD_DELIMITER = "\\$";
+    private static final String PATH_REGEX = "/[a-zA-Z0-9]+/[a-zA-Z0-9]+";
+
     private Filer mFiler;
     private Elements mElements;
     private Types mTypes;
@@ -41,9 +49,15 @@ public class RouterProcessor extends AbstractProcessor {
         Set<? extends Element> routerElements = roundEnvironment.getElementsAnnotatedWith(Route.class);
         Map<String, TypeElement> routeMap = new HashMap<>();
         TypeMirror typeActivity = mElements.getTypeElement("android.app.Activity").asType();
+        Pattern pattern = Pattern.compile(PATH_REGEX);
         for (Element element : routerElements) {
             if (!mTypes.isSubtype(element.asType(), typeActivity)) {
                 throw new RuntimeException("Unsupported class type, type is [" + element.asType().toString() + "], only support Activity now.");
+            }
+            String path = element.getAnnotation(Route.class).path();
+            Matcher matcher = pattern.matcher(path);
+            if (!matcher.matches()) {
+                throw new RuntimeException("Can not resolve the path [" + path + "].");
             }
             routeMap.put(element.getAnnotation(Route.class).path(), (TypeElement) element);
         }
@@ -65,10 +79,10 @@ public class RouterProcessor extends AbstractProcessor {
     private void createFile(Map<String, TypeElement> routeMap) {
         for (Map.Entry<String, TypeElement> entry : routeMap.entrySet()) {
             try {
-                String className = "com.zhqydot.framework.easyrouter.core.RouteLoader$" + entry.getValue().getSimpleName() + "$" + entry.getKey();
-                JavaFileObject jfo = mFiler.createSourceFile(className, new Element[]{});
+                String className = getClassName(entry);
+                JavaFileObject jfo = mFiler.createSourceFile(PACKAGE_NAME + "." + className, new Element[]{});
                 Writer writer = jfo.openWriter();
-                writer.write(brewCode("RouteLoader$" + entry.getValue().getSimpleName() + "$" + entry.getKey(), entry));
+                writer.write(brewCode(className, entry));
                 writer.flush();
                 writer.close();
             } catch (IOException e) {
@@ -99,5 +113,12 @@ public class RouterProcessor extends AbstractProcessor {
         builder.append(" * do not modify it\n");
         builder.append(" * or it will cause EasyRouter run with exception\n");
         builder.append(" */\n\n");
+    }
+
+    private String getClassName(Map.Entry<String, TypeElement> entry) {
+        String path = entry.getKey();
+        path = path.replaceFirst("/", "").replaceAll("/", WORD_DELIMITER);
+        return LOADER_PREFIX + FIELD_DELIMITER + path + FIELD_DELIMITER +
+                entry.getValue().getQualifiedName().toString().replaceAll("\\.", WORD_DELIMITER);
     }
 }

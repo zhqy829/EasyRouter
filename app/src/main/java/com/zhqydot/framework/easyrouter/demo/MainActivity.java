@@ -14,7 +14,7 @@ import com.zhqydot.framework.easyrouter.core.router.RouterManager;
  * @date 2018/9/16
  */
 
-@Route(path = "main")
+@Route(path = "/user/main")
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("CheckResult")
     private void testRoute() {
-        RouterManager.routeTo(this, "second")
+        RouterManager.routeTo(this, "/user/second")
                 .withString("data1", "Come from main:")
                 .withInt("data2", 10)
                 .navigationForResult(0)

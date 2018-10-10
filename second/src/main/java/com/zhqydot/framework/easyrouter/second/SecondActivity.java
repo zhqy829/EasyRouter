@@ -14,7 +14,7 @@ import com.zhqydot.framework.second.R;
  * @date 2018/9/16
  */
 
-@Route(path = "second")
+@Route(path = "/user/second")
 public class SecondActivity extends AppCompatActivity {
 
     @Override
