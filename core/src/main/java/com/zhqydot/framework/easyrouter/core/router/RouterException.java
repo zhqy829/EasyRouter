@@ -5,9 +5,9 @@ package com.zhqydot.framework.easyrouter.core.router;
  * @date 2018/9/16
  */
 
-public class RouteException extends RuntimeException {
+public class RouterException extends RuntimeException {
 
-    public RouteException(String message) {
+    public RouterException(String message) {
         super(message);
     }
 }
