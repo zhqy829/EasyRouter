@@ -37,7 +37,7 @@ public class RouterProcessor extends AbstractProcessor {
     private Elements mElements;
     private Types mTypes;
 
-    @Override public synchronized void init(ProcessingEnvironment processingEnvironment) {
+    @Override public void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
         mFiler = processingEnvironment.getFiler();
         mElements = processingEnv.getElementUtils();
@@ -94,10 +94,12 @@ public class RouterProcessor extends AbstractProcessor {
     private String brewCode(String className, Map.Entry<String, TypeElement> entry) {
         StringBuilder builder = new StringBuilder();
         builder.append("package com.zhqydot.framework.easyrouter.core;\n\n");
+        builder.append("import com.zhqydot.framework.easyrouter.core.common.IRouteLoader;\n");
         builder.append("import com.zhqydot.framework.easyrouter.core.common.EasyRouter;\n");
         builder.append("import ").append(entry.getValue().getQualifiedName()).append(";\n");
         appendComment(builder);
-        builder.append("public class ").append(className).append(" { \n\n");
+        builder.append("public class ").append(className).append(" implements IRouteLoader { \n\n");
+        builder.append("\t@Override\n");
         builder.append("\tpublic void load() { \n");
         builder.append("\t\t");
         builder.append(String.format("EasyRouter.register(\"%s\", %s.class);", entry.getKey(), entry.getValue().getSimpleName()));

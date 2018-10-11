@@ -4,12 +4,16 @@ import android.support.annotation.NonNull;
 
 public class FilterWrapper implements Comparable<FilterWrapper> {
 
-    RouteFilter filter;
-    int priority;
+    private RouteFilter mFilter;
+    private int mPriority;
 
     FilterWrapper(RouteFilter filter, int priority) {
-        this.filter = filter;
-        this.priority = priority;
+        this.mFilter = filter;
+        this.mPriority = priority;
+    }
+
+    public RouteFilter getFilter() {
+        return mFilter;
     }
 
     @Override
@@ -18,19 +22,19 @@ public class FilterWrapper implements Comparable<FilterWrapper> {
             return false;
         }
         FilterWrapper fw = (FilterWrapper) obj;
-        return filter == fw.filter;
+        return mFilter == fw.mFilter;
     }
 
     @Override
     public int hashCode() {
-        return filter.hashCode();
+        return mFilter.hashCode();
     }
 
     @Override
     public int compareTo(@NonNull FilterWrapper o) {
-        if (priority > o.priority) {
+        if (mPriority > o.mPriority) {
             return 1;
-        } else if (priority < o.priority) {
+        } else if (mPriority < o.mPriority) {
             return -1;
         }
         return 0;
