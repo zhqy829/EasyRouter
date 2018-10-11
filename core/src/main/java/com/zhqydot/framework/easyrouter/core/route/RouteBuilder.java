@@ -1,10 +1,11 @@
-package com.zhqydot.framework.easyrouter.core.router;
+package com.zhqydot.framework.easyrouter.core.route;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 
-import com.zhqydot.framework.easyrouter.core.safr.ActivityResultInfo;
+import com.zhqydot.framework.easyrouter.core.arp.ActivityResultInfo;
+import com.zhqydot.framework.easyrouter.core.common.EasyRouter;
 
 import java.io.Serializable;
 
@@ -21,11 +22,11 @@ public class RouteBuilder {
     private String mPath;
     private Bundle mExtras;
 
-    protected RouteBuilder(String path) {
+    public RouteBuilder(String path) {
         this(null, path);
     }
 
-    protected RouteBuilder(Context context, String path) {
+    public RouteBuilder(Context context, String path) {
         mContext = context;
         mPath = path;
     }
@@ -119,22 +120,22 @@ public class RouteBuilder {
     }
 
     public void navigation() {
-        RouterManager.navigation(this);
+        EasyRouter.navigation(this);
     }
 
     public Observable<ActivityResultInfo> navigationForResult(int requestCode) {
-        return RouterManager.navigationForResult(this, requestCode);
+        return EasyRouter.navigationForResult(this, requestCode);
     }
 
-    protected Context getContext() {
+    public Context getContext() {
         return mContext;
     }
 
-    protected String getPath() {
+    public String getPath() {
         return mPath;
     }
 
-    protected Bundle getExtras() {
+    public Bundle getExtras() {
         return mExtras;
     }
 }

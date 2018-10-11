@@ -94,13 +94,13 @@ public class RouterProcessor extends AbstractProcessor {
     private String brewCode(String className, Map.Entry<String, TypeElement> entry) {
         StringBuilder builder = new StringBuilder();
         builder.append("package com.zhqydot.framework.easyrouter.core;\n\n");
-        builder.append("import com.zhqydot.framework.easyrouter.core.router.RouterManager;\n");
+        builder.append("import com.zhqydot.framework.easyrouter.core.common.EasyRouter;\n");
         builder.append("import ").append(entry.getValue().getQualifiedName()).append(";\n");
         appendComment(builder);
         builder.append("public class ").append(className).append(" { \n\n");
         builder.append("\tpublic void load() { \n");
         builder.append("\t\t");
-        builder.append(String.format("RouterManager.register(\"%s\", %s.class);", entry.getKey(), entry.getValue().getSimpleName()));
+        builder.append(String.format("EasyRouter.register(\"%s\", %s.class);", entry.getKey(), entry.getValue().getSimpleName()));
         builder.append("\n");
         builder.append("\t}\n");
         builder.append("}");

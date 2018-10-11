@@ -1,4 +1,4 @@
-package com.zhqydot.framework.easyrouter.core.router;
+package com.zhqydot.framework.easyrouter.core.common;
 
 import android.app.Activity;
 import android.content.Context;
@@ -7,19 +7,17 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.zhqydot.framework.easyrouter.core.router.filter.FilterManager;
-import com.zhqydot.framework.easyrouter.core.router.filter.FilterWrapper;
-import com.zhqydot.framework.easyrouter.core.router.filter.RouteFilter;
-import com.zhqydot.framework.easyrouter.core.safr.ActivityResultInfo;
-import com.zhqydot.framework.easyrouter.core.safr.RxActivityResult;
+import com.zhqydot.framework.easyrouter.core.filter.FilterManager;
+import com.zhqydot.framework.easyrouter.core.filter.RouteFilter;
+import com.zhqydot.framework.easyrouter.core.arp.ActivityResultInfo;
+import com.zhqydot.framework.easyrouter.core.arp.RxActivityResult;
+import com.zhqydot.framework.easyrouter.core.route.RouteBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import io.reactivex.Observable;
@@ -30,7 +28,7 @@ import io.reactivex.subjects.PublishSubject;
  * @date 2018/9/16
  */
 
-public class RouterManager {
+public class EasyRouter {
 
     public static final int RESULT_FILTER = -8;
     private static final String PATH_REGEX = "/[a-zA-Z0-9]+/[a-zA-Z0-9]+";
@@ -48,7 +46,7 @@ public class RouterManager {
         return new RouteBuilder(context, path);
     }
 
-    protected static void navigation(RouteBuilder routeBuilder) {
+    public static void navigation(RouteBuilder routeBuilder) {
         Class clazz = null;
         String path = routeBuilder.getPath();
         Bundle extras = routeBuilder.getExtras();
@@ -79,7 +77,7 @@ public class RouterManager {
         }
     }
 
-    protected static Observable<ActivityResultInfo> navigationForResult(RouteBuilder routeBuilder, int requestCode) {
+    public static Observable<ActivityResultInfo> navigationForResult(RouteBuilder routeBuilder, int requestCode) {
         Class clazz = null;
         String path = routeBuilder.getPath();
         Bundle extras = routeBuilder.getExtras();
@@ -142,7 +140,7 @@ public class RouterManager {
             } catch (ClassNotFoundException | IllegalAccessException |
                     InstantiationException | NoSuchMethodException | InvocationTargetException e) {
                 e.printStackTrace();
-                Log.e("RouterManager", e.getMessage());
+                Log.e("EasyRouter", e.getMessage());
             }
         }
     }

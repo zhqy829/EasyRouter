@@ -1,4 +1,4 @@
-package com.zhqydot.framework.easyrouter.core.router;
+package com.zhqydot.framework.easyrouter.core.common;
 
 import android.content.Context;
 

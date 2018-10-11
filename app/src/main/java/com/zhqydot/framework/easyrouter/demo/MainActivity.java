@@ -8,7 +8,7 @@ import android.widget.Toast;
 
 import com.zhqydot.framework.easyrouter.R;
 import com.zhqydot.framework.easyrouter.compiler.Route;
-import com.zhqydot.framework.easyrouter.core.router.RouterManager;
+import com.zhqydot.framework.easyrouter.core.common.EasyRouter;
 
 /**
  * @author zhqy
@@ -23,15 +23,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         findViewById(R.id.button).setOnClickListener(v -> testRoute());
-        RouterManager.addFilter((path, data) -> {
+        EasyRouter.addFilter((path, data) -> {
             Log.e("MainActivity", "filter 1");
             return true;
         }, 1);
-        RouterManager.addFilter((path, data) -> {
+        EasyRouter.addFilter((path, data) -> {
             Log.e("MainActivity", "filter 2");
             return true;
         }, 2);
-        RouterManager.addFilter((path, data) -> {
+        EasyRouter.addFilter((path, data) -> {
             Log.e("MainActivity", "filter 3");
             return true;
         }, "user", 3);
@@ -39,12 +39,12 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("CheckResult")
     private void testRoute() {
-        RouterManager.routeTo(this, "/user/second")
+        EasyRouter.routeTo(this, "/user/second")
                 .withString("data1", "Come from main:")
                 .withInt("data2", 10)
                 .navigationForResult(0)
                 .doOnNext(info -> {
-                    if (info.resultCode == RouterManager.RESULT_FILTER) {
+                    if (info.resultCode == EasyRouter.RESULT_FILTER) {
                         Toast.makeText(this, "请求被拦截", Toast.LENGTH_SHORT).show();
                     }
                 })

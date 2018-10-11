@@ -1,4 +1,4 @@
-package com.zhqydot.framework.easyrouter.core.router.filter;
+package com.zhqydot.framework.easyrouter.core.filter;
 
 import android.support.annotation.NonNull;
 
