@@ -35,6 +35,10 @@ public class MainActivity extends AppCompatActivity {
             Log.e("MainActivity", "filter 3");
             return true;
         }, "user", 3);
+        EasyRouter.addFilter((path, data) -> {
+            Log.e("MainActivity", "filter 4");
+            return true;
+        }, "user", 4);
     }
 
     @SuppressLint("CheckResult")

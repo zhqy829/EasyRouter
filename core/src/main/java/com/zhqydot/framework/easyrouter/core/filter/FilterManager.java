@@ -3,13 +3,13 @@ package com.zhqydot.framework.easyrouter.core.filter;
 import android.os.Bundle;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class FilterManager {
 
-    private Set<FilterWrapper> mGlobalFilters = new HashSet<>();
+    private Set<FilterWrapper> mGlobalFilters = new TreeSet<>();
     private Map<String, Set<FilterWrapper>> mGroupFilterMap = new HashMap<>();
 
     public void addFilter(RouteFilter filter, int priority) {
@@ -33,7 +33,7 @@ public class FilterManager {
         if (filter != null) {
             Set<FilterWrapper> groupFilters = mGroupFilterMap.get(group);
             if (groupFilters == null) {
-                groupFilters = new HashSet<>();
+                groupFilters = new TreeSet<>();
                 mGroupFilterMap.put(group, groupFilters);
             }
             groupFilters.add(new FilterWrapper(filter, priority));

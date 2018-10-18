@@ -33,9 +33,9 @@ public class FilterWrapper implements Comparable<FilterWrapper> {
     @Override
     public int compareTo(@NonNull FilterWrapper o) {
         if (mPriority > o.mPriority) {
-            return 1;
-        } else if (mPriority < o.mPriority) {
             return -1;
+        } else if (mPriority < o.mPriority) {
+            return 1;
         }
         return 0;
     }
