@@ -4,7 +4,7 @@
 
 简单使用
 =======
-#Step1:初始化，推荐在Application中进行
+#Step1:初始化，推荐在Application中进行<br>
 ```
 public class MyApplication extends Application {
   @Override
@@ -14,7 +14,7 @@ public class MyApplication extends Application {
 }
 ```
 <br>
-#Step2:在需要路由的Activity添加注解，路径至少需要两级，如/user/second
+#Step2:在需要路由的Activity添加注解，路径至少需要两级，如/user/second<br>
 ```
 @Route(path = "/user/second")
 public class SecondActivity extends AppCompatActivity {
@@ -22,7 +22,7 @@ public class SecondActivity extends AppCompatActivity {
 }
 ```
 <br>
-#Step3:路由跳转，处理Activity返回
+#Step3:路由跳转，处理Activity返回<br>
 ```
 EasyRouter.routeTo(this, "/user/second")
                 .withString("data1", "Come from main:")
