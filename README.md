@@ -14,7 +14,7 @@ public class MyApplication extends Application {
 }
 ```
 <br>
-#Step2:在需要路由的Activity添加注解，路径至少需要两级，如/user/login
+#Step2:在需要路由的Activity添加注解，路径至少需要两级，如/user/second
 ```
 @Route(path = "/user/second")
 public class SecondActivity extends AppCompatActivity {
