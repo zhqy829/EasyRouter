@@ -38,17 +38,16 @@ public class EasyRouter {
 
     public static void init(@NonNull Context context) {
         sContext = context.getApplicationContext();
-        List<String> classes = ClassUtils.getClasses(context, "com.zhqydot.framework.easyrouter.core.RouteLoader$$");
+        List<String> classes = ClassUtils.getClasses(context, "com.zhqydot.framework.easyrouter.core.RouteLoader$");
         for (String className : classes) {
             try {
                 Class clazz = Class.forName(className);
                 if (IRouteLoader.class.isAssignableFrom(clazz)) {
-                    Object obj = clazz.newInstance();
-                    Method method = clazz.getDeclaredMethod("load");
-                    method.invoke(obj);
+                    IRouteLoader loader = (IRouteLoader) clazz.newInstance();
+                    loader.load();
                 }
             } catch (ClassNotFoundException | IllegalAccessException |
-                    InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+                    InstantiationException e) {
                 e.printStackTrace();
                 Log.e("EasyRouter", e.getMessage());
             }

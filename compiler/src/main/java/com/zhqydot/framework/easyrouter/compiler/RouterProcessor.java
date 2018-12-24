@@ -28,20 +28,34 @@ import javax.tools.JavaFileObject;
 public class RouterProcessor extends AbstractProcessor {
 
     private static final String PACKAGE_NAME = "com.zhqydot.framework.easyrouter.core";
-    private static final String LOADER_PREFIX = "RouteLoader";
-    private static final String FIELD_DELIMITER = "$$";
-    private static final String WORD_DELIMITER = "\\$";
+    private static final String LOADER_CLASS_NAME_PREFIX = "RouteLoader";
+    private static final String PACKAGE_DELIMITER = ".";
+    private static final String CLASS_DELIMITER = "$";
     private static final String PATH_REGEX = "/[a-zA-Z0-9]+/[a-zA-Z0-9]+";
 
     private Filer mFiler;
     private Elements mElements;
     private Types mTypes;
+    private String mModuleName;
 
-    @Override public void init(ProcessingEnvironment processingEnvironment) {
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.RELEASE_8;
+    }
+
+    @Override public Set<String> getSupportedAnnotationTypes() {
+        Set<String> annotations = new LinkedHashSet<>();
+        annotations.add(Route.class.getCanonicalName());
+        return annotations;
+    }
+
+    @Override
+    public void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
         mFiler = processingEnvironment.getFiler();
         mElements = processingEnv.getElementUtils();
         mTypes = processingEnv.getTypeUtils();
+        mModuleName = ModuleUtils.getModuleName(mFiler).toLowerCase();
     }
 
     @Override
@@ -65,48 +79,40 @@ public class RouterProcessor extends AbstractProcessor {
         return true;
     }
 
-    @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.RELEASE_8;
-    }
-
-    @Override public Set<String> getSupportedAnnotationTypes() {
-        Set<String> annotations = new LinkedHashSet<>();
-        annotations.add(Route.class.getCanonicalName());
-        return annotations;
-    }
-
     private void createFile(Map<String, TypeElement> routeMap) {
-        for (Map.Entry<String, TypeElement> entry : routeMap.entrySet()) {
-            try {
-                String className = getClassName(entry);
-                JavaFileObject jfo = mFiler.createSourceFile(PACKAGE_NAME + "." + className, new Element[]{});
-                Writer writer = jfo.openWriter();
-                writer.write(brewCode(className, entry));
-                writer.flush();
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            createJavaFile(getLoaderClassFullName(), routeMap, map -> {
+                StringBuilder builder = new StringBuilder();
+                builder.append("package com.zhqydot.framework.easyrouter.core;\n\n");
+                builder.append("import com.zhqydot.framework.easyrouter.core.common.IRouteLoader;\n");
+                builder.append("import com.zhqydot.framework.easyrouter.core.common.EasyRouter;\n");
+                for (Map.Entry<String, TypeElement> entry : routeMap.entrySet()) {
+                    builder.append("import ").append(entry.getValue().getQualifiedName()).append(";\n");
+                }
+                appendComment(builder);
+                builder.append("public class ").append(getLoaderClassSimpleName()).append(" implements IRouteLoader { \n\n");
+                builder.append("\t@Override\n");
+                builder.append("\tpublic void load() { \n");
+                for (Map.Entry<String, TypeElement> entry : routeMap.entrySet()) {
+                    builder.append("\t\t");
+                    builder.append(String.format("EasyRouter.register(\"%s\", %s.class);", entry.getKey(), entry.getValue().getSimpleName()));
+                    builder.append("\n");
+                }
+                builder.append("\t}\n");
+                builder.append("}");
+                return builder.toString();
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    private String brewCode(String className, Map.Entry<String, TypeElement> entry) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("package com.zhqydot.framework.easyrouter.core;\n\n");
-        builder.append("import com.zhqydot.framework.easyrouter.core.common.IRouteLoader;\n");
-        builder.append("import com.zhqydot.framework.easyrouter.core.common.EasyRouter;\n");
-        builder.append("import ").append(entry.getValue().getQualifiedName()).append(";\n");
-        appendComment(builder);
-        builder.append("public class ").append(className).append(" implements IRouteLoader { \n\n");
-        builder.append("\t@Override\n");
-        builder.append("\tpublic void load() { \n");
-        builder.append("\t\t");
-        builder.append(String.format("EasyRouter.register(\"%s\", %s.class);", entry.getKey(), entry.getValue().getSimpleName()));
-        builder.append("\n");
-        builder.append("\t}\n");
-        builder.append("}");
-        return builder.toString();
+    private void createJavaFile(String fileName, Map<String, TypeElement> routeMap, CodeBuilder builder) throws IOException {
+        JavaFileObject jfo = mFiler.createSourceFile(fileName);
+        Writer writer = jfo.openWriter();
+        writer.write(builder.build(routeMap));
+        writer.flush();
+        writer.close();
     }
 
     private void appendComment(StringBuilder builder) {
@@ -117,10 +123,16 @@ public class RouterProcessor extends AbstractProcessor {
         builder.append(" */\n\n");
     }
 
-    private String getClassName(Map.Entry<String, TypeElement> entry) {
-        String path = entry.getKey();
-        path = path.replaceFirst("/", "").replaceAll("/", WORD_DELIMITER);
-        return LOADER_PREFIX + FIELD_DELIMITER + path + FIELD_DELIMITER +
-                entry.getValue().getQualifiedName().toString().replaceAll("\\.", WORD_DELIMITER);
+    private String getLoaderClassSimpleName() {
+        return LOADER_CLASS_NAME_PREFIX + CLASS_DELIMITER + mModuleName;
     }
+
+    private String getLoaderClassFullName() {
+        return PACKAGE_NAME + PACKAGE_DELIMITER + getLoaderClassSimpleName();
+    }
+
+    private interface CodeBuilder {
+        String build(Map<String, TypeElement> routeMap);
+    }
+
 }
